@@ -1,6 +1,6 @@
 {
   "meta": {
     "title": "Sidebar logo",
-    "description": "Replace the logo in the sidebar's top-left corner with your own artwork, switch the whole row to Claude Code or Codex with a built-in preset, or hide it entirely so everything below moves up. A part you leave blank keeps the shipped DeepSeek artwork, so you can change just the mark or just the wordmark; Hide the mark cell lets a self-contained wordmark image stand alone. Open Settings, then Sidebar logo, to edit; the page previews your edits as you type. Settings are saved in this browser only."
+    "description": "Replace the logo in the sidebar's top-left corner with your own artwork, switch the whole row to Claude Code or Codex with a built-in preset, or hide it entirely so everything below moves up. A part you leave blank keeps the shipped DeepSeek artwork, so you can change just the mark or just the wordmark; Hide the mark cell lets a self-contained wordmark image stand alone. Three more switches port the Claude Code colour tokens, composer card and conversation onto the shipped interface. Open Settings, then Sidebar logo, to edit; the page previews your edits as you type. Settings are saved in this browser only."
   }
 }

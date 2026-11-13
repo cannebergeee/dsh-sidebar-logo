@@ -66,6 +66,243 @@ window.__ModuleLoader__.load({
     const WORDMARK_MAX_WIDTH = 640
     /** Cap for an image kept as an untouched data URL (SVG passthrough included). */
     const MAX_EMBEDDED_BYTES = 256 * 1024
+    /**
+     * The three Claude style switches, ported from dsh-claude-style 0.21.0. Each
+     * pair is one stored flag and the one body attribute its stylesheet block is
+     * gated on, so a switch that is off contributes nothing to the page — not a
+     * hidden rule, not a reset: the block simply matches nothing.
+     */
+    const STYLE_SWITCHES = [
+      { flag: 'styleTokens', attr: 'data-dsh-logo-tokens' },
+      { flag: 'styleComposer', attr: 'data-dsh-logo-composer' },
+      { flag: 'styleChat', attr: 'data-dsh-logo-chat' },
+    ]
+    /** Id of the single <style> element all three blocks share. */
+    const STYLE_ELEMENT_ID = 'dsh-logo-style'
+    /**
+     * The ported look. Three parts, each gated on its own body attribute:
+     *
+     * 1. tokens — the colour card (clay accent, paper canvas, warm neutrals, and
+     *    the dark set that derives from them). The host reads these through its
+     *    own `--dsw-alias-*` / `--dsw-specific-*` tokens, which is why one block
+     *    repaints the canvas, the sidebar, every border, every link and the
+     *    user's bubble at once.
+     * 2. composer — the input card's radius, outline, lift and focus halo.
+     * 3. chat — the conversation's prose rhythm and its markdown material.
+     *
+     * Host hooks are the semantic attributes the shipped client already
+     * publishes — `[data-composer-card]`, `[data-composer-input]`,
+     * `[data-composer-variant]`, `[data-phase]`, `[data-chat-flow]` and the
+     * `.md-code-block` class — never hashed class names, so a host rebuild can
+     * only make a rule miss, never point it at the wrong element. The declared
+     * values are the ones in dsh-claude-style's `docs/STYLE.md` colour and shape
+     * tables; its typefaces are not shipped here, so the port keeps the host's
+     * faces and takes only the palette and the geometry.
+     */
+    const STYLE_CSS = `
+/* ---------- 1. Colour tokens ---------- */
+body[data-dsh-logo-tokens] {
+  --dsw-alias-bg-base: #ffffff;
+  --dsw-alias-bg-layer-1: #ffffff;
+  --dsw-alias-bg-layer-2: #ffffff;
+  --dsw-alias-bg-layer-3: #ffffff;
+  --dsw-alias-bg-overlay: #ffffff;
+  --dsw-alias-border-l1: #e9e9e9;
+  --dsw-alias-border-l2: #dedede;
+  --dsw-alias-border-l3: #cfcfcf;
+  --dsw-alias-brand-primary: #d97757;
+  --dsw-alias-brand-text: #ffffff;
+  --dsw-alias-button-primary-fill: #d97757;
+  --dsw-alias-button-primary-hover: #c46343;
+  --dsw-alias-button-elevated-fill: #ffffff;
+  --dsw-alias-button-floating-fill: #ffffff;
+  --dsw-alias-button-floating-hover: #ffffff;
+  --dsw-alias-interactive-bg-hover: rgba(6, 6, 6, 0.08);
+  --dsw-alias-interactive-bg-hover-solid: #f4f4f4;
+  --dsw-alias-interactive-bg-active: rgba(246, 136, 98, 0.26);
+  --dsw-alias-label-primary: #161616;
+  --dsw-alias-label-secondary: #70686a;
+  --dsw-alias-label-tertiary: #91888a;
+  --dsw-alias-label-caption: #b2acad;
+  --dsw-alias-link: #bf6446;
+  --dsw-alias-state-business-primary: #d97757;
+  --dsw-alias-state-business-tertiary: #f6ded7;
+  --dsw-alias-markdown-code-block: #ffffff;
+  --dsw-alias-markdown-code-block-banner: #ffffff;
+  --dsw-alias-markdown-inline-code: rgba(6, 6, 6, 0.05);
+  --dsw-alias-shadow-lv2: 0 4px 18px rgba(20, 20, 19, 0.10), 0 1px 3px rgba(20, 20, 19, 0.05);
+  --dsw-specific-input-major: #ffffff;
+  --dsw-specific-selector: #fefefe;
+  --dsw-specific-sidebar-fill: #fafafa;
+  --dsw-specific-menu: #ffffff;
+  --dsw-specific-bubble: #f4f2f3;
+  --dsw-focus-ring-color: rgba(20, 20, 19, 0.45);
+  color: var(--dsw-alias-label-primary);
+  background-color: var(--dsw-alias-bg-base);
+}
+
+body[data-dsh-logo-tokens][data-ds-dark-theme] {
+  --dsw-alias-bg-base: #191919;
+  --dsw-alias-bg-layer-1: #212121;
+  --dsw-alias-bg-layer-2: #282828;
+  --dsw-alias-bg-layer-3: #323232;
+  --dsw-alias-bg-overlay: #282828;
+  --dsw-alias-border-l1: rgba(255, 255, 255, 0.09);
+  --dsw-alias-border-l2: rgba(255, 255, 255, 0.18);
+  --dsw-alias-border-l3: rgba(255, 255, 255, 0.30);
+  --dsw-alias-brand-primary: #d97757;
+  --dsw-alias-brand-text: #fbfbfb;
+  --dsw-alias-button-primary-fill: #d97757;
+  --dsw-alias-button-primary-hover: #eb9170;
+  --dsw-alias-button-elevated-fill: #282828;
+  --dsw-alias-button-floating-fill: #282828;
+  --dsw-alias-button-floating-hover: #323232;
+  --dsw-alias-interactive-bg-hover: rgba(255, 255, 255, 0.08);
+  --dsw-alias-interactive-bg-hover-solid: #323232;
+  --dsw-alias-interactive-bg-active: rgba(217, 119, 87, 0.30);
+  --dsw-alias-label-primary: #fdfdfd;
+  --dsw-alias-label-secondary: #beb6b8;
+  --dsw-alias-label-tertiary: #9c9395;
+  --dsw-alias-label-caption: #776f71;
+  --dsw-alias-link: #eaa088;
+  --dsw-alias-state-business-primary: #d97757;
+  --dsw-alias-state-business-tertiary: #48261b;
+  --dsw-alias-markdown-code-block: #212121;
+  --dsw-alias-markdown-code-block-banner: #282828;
+  --dsw-alias-markdown-inline-code: rgba(255, 255, 255, 0.05);
+  --dsw-alias-shadow-lv2: 0 4px 16px rgba(0, 0, 0, 0.30), 0 1px 3px rgba(0, 0, 0, 0.14);
+  --dsw-specific-input-major: #141414;
+  --dsw-specific-selector: #323232;
+  --dsw-specific-sidebar-fill: #1f1f1f;
+  --dsw-specific-menu: #282828;
+  --dsw-specific-bubble: rgba(255, 255, 255, 0.06);
+  --dsw-focus-ring-color: rgba(250, 249, 245, 0.60);
+  background-color: var(--dsw-alias-bg-base);
+}
+
+html:has(body[data-dsh-logo-tokens]) {
+  background-color: #ffffff;
+}
+
+html:has(body[data-dsh-logo-tokens][data-ds-dark-theme]) {
+  background-color: #191919;
+}
+
+body[data-dsh-logo-tokens] #root {
+  background-color: var(--dsw-alias-bg-base);
+}
+
+/* ---------- 2. Composer card ---------- */
+body[data-dsh-logo-composer] [data-composer-card] {
+  font-size: 15px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 18px;
+  background: var(--dsw-specific-input-major, #ffffff);
+  box-shadow: 0 4px 12px rgba(20, 20, 19, 0.04), 0 1px 3px rgba(20, 20, 19, 0.02);
+  gap: 8px;
+  min-height: 0;
+  height: auto;
+  padding-bottom: 2px;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+body[data-dsh-logo-composer][data-ds-dark-theme] [data-composer-card] {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.30), 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+body[data-dsh-logo-composer] [data-composer-card]:focus-within {
+  border-color: var(--dsw-focus-ring-color, rgba(20, 20, 19, 0.45));
+  box-shadow: 0 4px 12px rgba(20, 20, 19, 0.06), 0 0 0 1px var(--dsw-focus-ring-color, rgba(20, 20, 19, 0.45));
+}
+
+body[data-dsh-logo-composer][data-ds-dark-theme] [data-composer-card]:focus-within {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.30), 0 0 0 1px var(--dsw-focus-ring-color, rgba(250, 249, 245, 0.60));
+}
+
+body[data-dsh-logo-composer] [data-composer-input] {
+  min-height: 36px;
+  height: auto;
+}
+
+body[data-dsh-logo-composer] [data-phase="hero"] [data-composer-input] {
+  min-height: 86px;
+}
+
+/* ---------- 3. Conversation ---------- */
+body[data-dsh-logo-chat] [data-chat-flow] {
+  line-height: 1.65;
+}
+
+body[data-dsh-logo-chat] [data-chat-flow] p {
+  margin: 12px 0;
+}
+
+body[data-dsh-logo-chat] [data-chat-flow] :is(h1, h2, h3) {
+  margin-top: 24px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+body[data-dsh-logo-chat] [data-chat-flow] :is(h1, h2, h3) + :is(h1, h2, h3) {
+  margin-top: 8px;
+}
+
+body[data-dsh-logo-chat] [data-chat-flow] :is(h4, h5, h6) {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+body[data-dsh-logo-chat] .md-code-block {
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 12px;
+  margin: 12px 0;
+}
+
+body[data-dsh-logo-chat] [data-chat-flow] pre {
+  font-size: calc(1em - 1px);
+}
+
+body[data-dsh-logo-chat] [data-chat-flow] code:not(pre code) {
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 4px;
+  padding: 1px 4px;
+  background: var(--dsw-alias-markdown-inline-code, rgba(6, 6, 6, 0.05));
+  font-size: 0.92em;
+  line-height: 1.2;
+}
+
+body[data-dsh-logo-chat] [data-chat-flow] blockquote {
+  margin: 12px 0;
+  padding: 0.6em 1em;
+  border-left: 2px solid var(--dsw-alias-label-caption);
+  border-radius: 0 8px 8px 0;
+  background: rgba(20, 20, 19, 0.04);
+  color: var(--dsw-alias-label-secondary);
+  font-style: normal;
+}
+
+body[data-dsh-logo-chat][data-ds-dark-theme] [data-chat-flow] blockquote {
+  background: rgba(250, 249, 245, 0.06);
+}
+
+body[data-dsh-logo-chat] [data-chat-flow] thead :is(th, td) {
+  background: var(--dsw-alias-bg-layer-2, #f4f4f4);
+}
+
+body[data-dsh-logo-chat] [data-chat-flow] hr {
+  border: 0;
+  border-top: 0.5px solid var(--dsw-alias-border-l1);
+  margin: 1.6em 0;
+}
+
+body[data-dsh-logo-chat] [data-chat-flow] a {
+  color: var(--dsw-alias-link);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 2px;
+}
+`
 
     const TRANSLATIONS = {
       en: {
@@ -100,6 +337,15 @@ window.__ModuleLoader__.load({
         'presets.claude': 'Claude Code',
         'presets.codex': 'Codex',
         'presets.none': 'No logo',
+        'styles.title': 'Claude interface',
+        'styles.desc': 'Three parts of the Claude Code look, ported onto the shipped interface. Each switch is independent and takes effect the moment it is flipped.',
+        'styles.tokens.title': 'Colour tokens',
+        'styles.tokens.desc': 'The warm Claude palette: clay accent, paper canvas, warm neutrals, and the dark set derived from the same seeds.',
+        'styles.composer.title': 'Composer card',
+        'styles.composer.desc': 'A rounder outlined input card with a soft lift and a focus halo.',
+        'styles.chat.title': 'Conversation',
+        'styles.chat.desc': 'Claude’s prose rhythm: paragraph and heading spacing, code blocks and inline-code chips, table heads, quotes and links.',
+        'styles.conflict': 'Do not leave this on together with a full theme plugin such as dsh-claude-style: both paint the same tokens.',
       },
       zh: {
         'section.title': '侧边栏 Logo',
@@ -133,6 +379,15 @@ window.__ModuleLoader__.load({
         'presets.claude': 'Claude Code',
         'presets.codex': 'Codex',
         'presets.none': '无 logo',
+        'styles.title': 'Claude 界面',
+        'styles.desc': '把 Claude Code 的三个部分搬到宿主界面上；三个开关互相独立，拨动即生效。',
+        'styles.tokens.title': '配色令牌',
+        'styles.tokens.desc': 'Claude 的暖色卡：陶土橙强调色、纸白画布、暖中性灰，深色一套同源。',
+        'styles.composer.title': '输入卡片',
+        'styles.composer.desc': '更圆的描边卡片，配柔和投影与聚焦光晕。',
+        'styles.chat.title': '对话流',
+        'styles.chat.desc': 'Claude 的排版节奏：段落与标题间距、代码块与行内代码、表头、引用与链接。',
+        'styles.conflict': '不要与 dsh-claude-style 这类整套主题插件同时开启：两者会抢同一批令牌。',
       },
     }
 
@@ -237,6 +492,9 @@ window.__ModuleLoader__.load({
         }
         if (parsed[HIDE_MARK] === true) next[HIDE_MARK] = true
         if (parsed[HIDE_BRAND] === true) next[HIDE_BRAND] = true
+        for (const { flag } of STYLE_SWITCHES) {
+          if (parsed[flag] === true) next[flag] = true
+        }
         return next
       } catch {
         return {}
@@ -259,16 +517,32 @@ window.__ModuleLoader__.load({
     }
 
     /**
-     * @param {Record<string, string | boolean>} a - logo settings.
-     * @param {Record<string, string | boolean>} b - logo settings.
-     * @returns whether both hold the same fields, in any key order.
+     * Compare the brand half only: the four strings and the two hide flags.
+     * A brand preset names exactly these, so it stays "active" whatever the
+     * style switches are set to.
+     * @param {Record<string, string | boolean>} a - settings.
+     * @param {Record<string, string | boolean>} b - settings.
+     * @returns whether both hold the same brand fields, in any key order.
      */
-    function sameLogo(a, b) {
+    function sameBrand(a, b) {
       for (const field of FIELDS) {
         if ((a[field] || '') !== (b[field] || '')) return false
       }
       return (a[HIDE_MARK] === true) === (b[HIDE_MARK] === true)
         && (a[HIDE_BRAND] === true) === (b[HIDE_BRAND] === true)
+    }
+
+    /**
+     * Compare everything the store holds: the brand half plus the three style
+     * switches. Cross-tab writes go through this, so flipping a switch in one
+     * tab reaches the other one's paint even when the logo is untouched.
+     * @param {Record<string, string | boolean>} a - settings.
+     * @param {Record<string, string | boolean>} b - settings.
+     * @returns whether both hold the same settings.
+     */
+    function sameSettings(a, b) {
+      if (!sameBrand(a, b)) return false
+      return STYLE_SWITCHES.every(({ flag }) => (a[flag] === true) === (b[flag] === true))
     }
 
     /**
@@ -309,20 +583,41 @@ window.__ModuleLoader__.load({
           return commit({ ...value, ...patch })
         },
         /**
-         * Drop every stored field, restoring the shipped logo.
+         * Drop every brand field, restoring the shipped logo. The three style
+         * switches are preferences in their own right, so they survive: this
+         * button is the logo's reset, not the page's.
          * @returns whether the browser accepted the write.
          */
         reset() {
-          if (sameLogo(value, {})) return true
-          return commit({})
+          const keep = {}
+          for (const { flag } of STYLE_SWITCHES) {
+            if (value[flag] === true) keep[flag] = true
+          }
+          if (sameSettings(value, keep)) return true
+          return commit(keep)
         },
         /** Adopt another tab's write. */
         rehydrate() {
           const next = readStored()
-          if (sameLogo(value, next)) return
+          if (sameSettings(value, next)) return
           value = next
           publish()
         },
+      }
+    }
+
+    /**
+     * Flip the three style attributes on <body> to match the stored switches.
+     * The stylesheet is always present; these attributes are what decide which
+     * of its three blocks can match, so a switch is one attribute write.
+     * @param {Record<string, string | boolean>} settings - stored settings.
+     */
+    function syncStyleAttributes(settings) {
+      const body = document.body
+      if (!body) return
+      for (const { flag, attr } of STYLE_SWITCHES) {
+        if (settings[flag] === true) body.setAttribute(attr, '')
+        else body.removeAttribute(attr)
       }
     }
 
@@ -750,7 +1045,7 @@ window.__ModuleLoader__.load({
             h('p', { className: 'sl-desc' }, t('presets.desc')),
             h('div', { className: 'sl-row' },
               PRESETS.map(preset => {
-                const active = sameLogo(logo, preset.values)
+                const active = sameBrand(logo, preset.values)
                 return h('button', {
                   key: preset.id,
                   type: 'button',
@@ -769,6 +1064,26 @@ window.__ModuleLoader__.load({
                 configured ? strip : h('span', { className: 'sl-empty' }, t('preview.empty')),
               ),
             ),
+          ),
+
+          // The three ported Claude style switches. Each one owns a body
+          // attribute and its own stylesheet block, so flipping one is a single
+          // attribute write — no rule is added to or removed from the page.
+          h('div', { className: 'sl-field', key: 'styles' },
+            h('div', { className: 'sl-label' }, t('styles.title')),
+            h('p', { className: 'sl-desc' }, t('styles.desc')),
+            STYLE_SWITCHES.map(({ flag }) => h(CheckField, {
+              key: flag,
+              id: 'sl-field-' + flag,
+              label: t('styles.' + flag.slice(5).toLowerCase() + '.title'),
+              description: t('styles.' + flag.slice(5).toLowerCase() + '.desc'),
+              checked: logo[flag] === true,
+              onChange: (next) => {
+                setProblem('')
+                write({ [flag]: next })
+              },
+            })),
+            h('p', { className: 'sl-note' }, t('styles.conflict')),
           ),
 
           h(ImageField, {
@@ -928,6 +1243,27 @@ window.__ModuleLoader__.load({
           disposeName()
         }, 'sidebar-logo: brand teardown')
         syncBrand()
+
+        // One <style> element for the life of the plugin, holding all three
+        // ported blocks; the switches only move the body attributes it reads.
+        ctx.effect(() => {
+          const element = document.createElement('style')
+          element.id = STYLE_ELEMENT_ID
+          element.textContent = STYLE_CSS
+          document.head.appendChild(element)
+          const applySwitches = () => {
+            syncStyleAttributes(store.getSnapshot())
+          }
+          applySwitches()
+          const off = store.subscribe(applySwitches)
+          return () => {
+            off()
+            element.remove()
+            if (document.body) {
+              for (const { attr } of STYLE_SWITCHES) document.body.removeAttribute(attr)
+            }
+          }
+        }, 'sidebar-logo: ported styles')
 
         ctx.slots.inject('settings.section', () => ctx.slots.register({
           name: 'settings.section',

@@ -2,7 +2,7 @@
 
 [English](README.md) | 中文
 
-一个 DeepSeek Harness 插件：把侧边栏左上角的 logo 按部分换成你自己的素材 —— DeepSeek 鲸鱼徽标、`deepseek` 文字标识、`HARNESS` 角标都能分别替换，编辑入口在「设置」里。内置两套预设，一点就能把整行换成 Claude Code 或 Codex。
+一个 DeepSeek Harness 插件：把侧边栏左上角的 logo 按部分换成你自己的素材 —— DeepSeek 鲸鱼徽标、`deepseek` 文字标识、`HARNESS` 角标都能分别替换，编辑入口在「设置」里。内置两套预设，一点就能把整行换成 Claude Code 或 Codex。另附三个开关，把 Claude Code 的配色令牌、输入卡片与对话流搬过来（见「Claude 界面」）。
 
 ## 安装
 
@@ -61,9 +61,25 @@ OpenAI 没有公开的独立 Codex logo 文件：他们自己的 Codex 页面 `o
 
 如果将来外壳改了这层嵌套，规则就匹配不到任何东西，那一行原样留着 —— 不会误伤别的元素。
 
+## Claude 界面（三个开关）
+
+设置页里还有三个互相独立的开关，把 Claude Code 的三个部分搬到宿主界面上 —— 移植自 [dsh-claude-style](https://github.com/Nwflower/dsh-claude-style) 0.21.0 的配色令牌、输入卡片与对话流。拨动即生效，不用刷新。
+
+| 开关 | 生效范围 |
+| --- | --- |
+| **配色令牌** | 陶土橙强调色 `#d97757`、纸白画布 `#ffffff`、暖中性侧栏 `#fafafa` 与三档边框；深色一套同源（`#191919` / `#1f1f1f`）。宿主用的是 `--dsw-alias-*` / `--dsw-specific-*` 别名令牌，所以一处改动会连画布、侧栏、边框、链接、行内代码、用户气泡一起变。 |
+| **输入卡片** | 输入框卡片：18 px 圆角、1 px 描边、柔和投影；聚焦时描边加深并加一圈光晕。新建会话保持 86 px 高，对话里随内容长高。 |
+| **对话流** | 正文节奏与 markdown 材质：段距 12 px、标题 24/12 px 节奏、代码块 12 px 圆角描边、行内代码 chip、表头底色、引用块、`hr` 与链接。 |
+
+实现要点：三段样式共用一个 `<style>`，分别挂在 `body[data-dsh-logo-tokens]` / `[data-dsh-logo-composer]` / `[data-dsh-logo-chat]` 之下 —— 开关关掉时那一段**匹配不到任何元素**，不是被覆盖、也不是被隐藏。选择器只认宿主已经公开的语义属性（`[data-composer-card]`、`[data-composer-input]`、`[data-phase]`、`[data-chat-flow]`、`.md-code-block`），不用带哈希的类名，宿主改版最多让某条规则失配，不会误伤别的元素。
+
+**三款 Anthropic 字体没有随包发布**（不可再分发），所以这一层搬的是配色与几何，字体仍用宿主自己的。
+
+⚠️ 别和整套主题插件（例如 `dsh-claude-style`）同时开：两者抢同一批令牌，谁后加载谁赢。
+
 ## 限制
 
-- **配置只存在当前浏览器。** 存在 `localStorage` 的 `dsh.sidebar-logo.v1` 下，换浏览器或换 profile 就回到官方 logo。这是纯展示配置，不进会话、不进模型请求。浏览器拒绝写入时，页面会明确提示"无法保存"，而不是假装成功。
+- **配置只存在当前浏览器。** 存在 `localStorage` 的 `dsh.sidebar-logo.v1` 下（三个样式开关也在这个键里），换浏览器或换 profile 就回到官方 logo 与官方样式。这是纯展示配置，不进会话、不进模型请求。浏览器拒绝写入时，页面会明确提示"无法保存"，而不是假装成功。
 - **图片是内嵌的，不走文件路径。** 选中的位图会在页面里缩放（徽标 96 px，字标高 96 px、宽最多 640 px）后存成 `data:` URL；SVG 保留矢量，上限 256 KB。
 - **名称和角标是纯文字。** 它们跟随侧栏的墨色，所以浅色/深色主题都正常；徽标和字标保留自己的颜色。侧栏变窄时名称会省略号截断，角标有宽度上限，不会顶出这一行。
 - **折叠轨道只显示徽标**，因为外壳在折叠时只渲染那一格。
@@ -83,7 +99,7 @@ OpenAI 没有公开的独立 Codex logo 文件：他们自己的 Codex 页面 `o
 | `package.json` | bundle 清单：patch、Client 声明、exports、图标。 |
 | `cordis.patch.yml` | 插入 `sidebar-logo` 这条 Loader 条目。 |
 | `index.js` | Host 半边；不 import 任何包，不注册任何东西。 |
-| `client.js` | 品牌位、设置页、预设、存储、词典，全部在这里。 |
+| `client.js` | 品牌位、设置页、预设、存储、词典，以及三套 Claude 样式（令牌 / 输入卡片 / 对话流）与它们的开关。 |
 | `locale/*.json` | Plugin Manager 里的标题和描述。 |
 | `icon.svg` | 插件图标。 |
 | `assets/` | 预设用的品牌素材，附来源与商标说明。 |
