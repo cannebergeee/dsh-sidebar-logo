@@ -3,8 +3,7 @@
 This directory holds artwork for the two presets the plugin ships. **These files
 belong to their owners, are not covered by this repository's MIT license, and
 are here only so that a preset can put a recognizable mark in front of the tool
-it represents.** All of them are published by the vendor itself; nothing here was
-redrawn.
+it represents.**
 
 ## Claude / Claude Code — Anthropic PBC
 
@@ -30,15 +29,31 @@ files are kept here.
 
 ## Codex — OpenAI
 
-- Source: the `openai/codex` repository, commit
-  [`6832f365`](https://github.com/openai/codex/commit/6832f3657a1dada0aec99fb33d17caca66d5da23),
-  file `codex-rs/login/src/assets/success.html` — the inline mark used as that
-  page's logo and favicon. OpenAI publishes no standalone Codex logo file (the
-  repository has none, and `openai.com/brand` does not offer one), so this
-  vendor-authored artwork is the closest official asset.
-- `codex-mark.svg` is that markup verbatim (black `#000` stroke).
-  `codex-mark-light.svg` is the same path with a white stroke, for dark
-  backgrounds — the only change.
+OpenAI publishes **no standalone Codex logo file**. Checked on 2026-11-13:
+
+- `openai/codex` (the official repository) ships no logo asset — a full tree scan
+  finds only `.github/codex-cli-splash.png`, a terminal screenshot. Its login
+  page brands itself with the inline `>_`-in-a-circle SVG kept here as
+  `codex-mark.svg`.
+- `openai.com/brand` answers 403 to non-browser requests and offers no public
+  download.
+- The official Codex page (<https://chatgpt.com/codex>) brands itself with a
+  **wordmark only** — white “Codex” on an indigo gradient, in its `og:image` —
+  and its favicons are the ChatGPT blossom.
+- The Codex **product icon** (blue cloud with a `>_` prompt) exists only inside
+  OpenAI's own distributions: the macOS app bundle (`Codex.dmg`, 912 MB, linked
+  from the app's Sparkle feed at
+  `https://persistent.oaistatic.com/codex-app-prod/appcast.xml`) and the
+  `openai.chatgpt` VS Code extension.
+
+| File | What it is | Provenance |
+| --- | --- | --- |
+| `codex-app-icon.png` | the Codex product mark: blue cloud with a white `>_` prompt, 104 × 104, transparent RGBA | OpenAI's app mark, obtained from the GitHub mirror [`bytepioneer-ai/codex-host`](https://github.com/bytepioneer-ai/codex-host/blob/main/packages/renderer-extension/src/assets/README.md), whose README records extracting it from the `openai.chatgpt` VS Code extension distributed by OpenAI. Re-fetched from an OpenAI endpoint here was not possible (see above). SHA-256 `8E82B26C98A10E45798CE48124515720657F7735FB8D0853B3F087EAA8A6B74E`. **This one is the preset's mark.** |
+| `codex-mark.svg` | the `>_`-in-a-circle mark from the Codex login page | verbatim copy of the SVG in [`openai/codex` `codex-rs/login/src/assets/success.html`](https://github.com/openai/codex/blob/main/codex-rs/login/src/assets/success.html), black stroke |
+| `codex-mark-light.svg` | the same path, white stroke | recolored for dark backgrounds — the only change |
+
+The preset therefore uses the app icon; the two `codex-mark*.svg` files are the
+strictly repository-published alternative if you prefer a monochrome mark.
 
 ## What the plugin embeds
 
@@ -48,7 +63,7 @@ single click:
 | Preset | Embedded | Extra fields |
 | --- | --- | --- |
 | Claude Code | `claude-spark-clay.svg`, `claude-code-logo-slate.svg` | badge `ANTHROP\C`, mark cell hidden |
-| Codex | `codex-mark.svg` | name `Codex`, badge `OPENAI` |
+| Codex | `codex-app-icon.png` | name `Codex` |
 
 Regenerate the embedded copies after changing any of those files:
 

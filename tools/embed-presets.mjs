@@ -2,9 +2,9 @@
  * Embed the preset artwork into client.js.
  *
  * A `dsh.client` bundle is served as a single file, so a built-in preset cannot
- * read `assets/` at runtime. This script base64-encodes the three files the
- * presets use and rewrites the generated block in `client.js` between its
- * sentinel comments. Run it after changing any of those files:
+ * read `assets/` at runtime. This script base64-encodes the artwork the presets
+ * use and rewrites the generated block in `client.js` between its sentinel
+ * comments. Run it after changing any of those files:
  *
  *     node tools/embed-presets.mjs
  */
@@ -15,18 +15,25 @@ import { fileURLToPath } from 'node:url'
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const target = join(root, 'client.js')
 
-/** Constant name in client.js -> vector file under assets/. */
+/** Constant name in client.js -> [file under assets/, media type]. */
 const SOURCES = {
-  CLAUDE_SPARK: 'assets/claude-spark-clay.svg',
-  CLAUDE_CODE_LOCKUP: 'assets/claude-code-logo-slate.svg',
-  CODEX_MARK: 'assets/codex-mark.svg',
+  CLAUDE_SPARK: ['assets/claude-spark-clay.svg', 'image/svg+xml'],
+  CLAUDE_CODE_LOCKUP: ['assets/claude-code-logo-slate.svg', 'image/svg+xml'],
+  CODEX_APP_ICON: ['assets/codex-app-icon.png', 'image/png'],
 }
 
-const lines = Object.entries(SOURCES).map(([name, file]) => {
+/** Reject a file whose bytes do not match the declared type. */
+const SIGNATURES = {
+  'image/svg+xml': head => head.includes('<svg'),
+  'image/png': head => head[0] === 0x89 && head[1] === 0x50 && head[2] === 0x4e && head[3] === 0x47,
+}
+
+const lines = Object.entries(SOURCES).map(([name, [file, mediaType]]) => {
   const bytes = readFileSync(join(root, file))
-  const head = bytes.subarray(0, 400).toString('utf8')
-  if (!head.includes('<svg')) throw new Error(file + ' does not look like an SVG')
-  return '      ' + name + ": 'data:image/svg+xml;base64," + bytes.toString('base64') + "',"
+  if (!SIGNATURES[mediaType](bytes.subarray(0, 400))) {
+    throw new Error(file + ' does not look like ' + mediaType)
+  }
+  return '      ' + name + ": 'data:" + mediaType + ';base64,' + bytes.toString('base64') + "',"
 })
 
 const block = [

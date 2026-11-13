@@ -37,7 +37,9 @@ dsh plugin --profile <profile> add github:cannebergeee/dsh-sidebar-logo
 | 预设 | 写入什么 | 素材 |
 | --- | --- | --- |
 | **Claude Code** | 字标 = Claude Code 锁定版，角标 `ANTHROP\C`，隐藏徽标格（星芒仍存着，取消隐藏就能看到） | [assets/claude-code-logo-slate.svg](assets/claude-code-logo-slate.svg)、[assets/claude-spark-clay.svg](assets/claude-spark-clay.svg) |
-| **Codex** | 徽标 = Codex 终端标记，名称 `Codex`，角标 `OPENAI` | [assets/codex-mark.svg](assets/codex-mark.svg) |
+| **Codex** | 徽标 = Codex 应用标记，名称 `Codex` | [assets/codex-app-icon.png](assets/codex-app-icon.png) |
+
+OpenAI 没有公开的独立 Codex logo 文件：他们自己的 Codex 页面 `og:image` 只有纯字标，产品图标只存在于自家应用和 VS Code 扩展的安装包里。[assets/SOURCES.md](assets/SOURCES.md) 记录了每个文件的来源，也包括一起放进去的备选（`codex-mark.svg`，官方仓库里那个 `>_` 圆环）。
 
 预设写的只是你手动也能改的那五个字段，套用之后随便改、随便清。素材以 base64 内嵌在 `client.js` 里（13 KiB），所以预设不需要选文件、也不需要联网；`assets/` 保留可读的原始文件，改完素材跑 `node tools/embed-presets.mjs` 重新生成内嵌块。
 
