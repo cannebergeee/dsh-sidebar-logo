@@ -1,0 +1,5 @@
+# The Host seat exists only so the Client bundle has an enabled Loader entry to
+# boot from; the logo itself is rendered and stored by client.js.
+- insert:
+    - id: sidebar-logo
+      name: '@local/sidebar-logo'

@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Sidebar logo",
+    "description": "Replace the logo in the sidebar's top-left corner with your own artwork: a mark image, a wide wordmark image, name text, and a badge tag. A part you leave blank keeps the shipped DeepSeek artwork, so you can change just the mark or just the wordmark; Hide the mark cell lets a self-contained wordmark image stand alone. Open Settings, then Sidebar logo, to edit; the page previews your edits as you type. Settings are saved in this browser only."
+  }
+}
