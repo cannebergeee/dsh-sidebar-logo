@@ -63,7 +63,7 @@ single click:
 | Preset | Embedded | Extra fields |
 | --- | --- | --- |
 | Claude Code | `claude-spark-clay.svg`, `claude-code-logo-slate.svg` | badge `ANTHROP\C`, mark cell hidden |
-| Codex | `codex-app-icon.png` | name `Codex` |
+| Codex | `codex-app-icon.png` | name `Codex`, badge `OPENAI` |
 
 Regenerate the embedded copies after changing any of those files:
 

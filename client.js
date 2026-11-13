@@ -141,7 +141,7 @@ window.__ModuleLoader__.load({
           mark: PRESET_ASSETS.CODEX_APP_ICON,
           wordmark: '',
           name: 'Codex',
-          badge: '',
+          badge: 'OPENAI',
           hideMark: false,
         },
       },

@@ -50,7 +50,7 @@ of the configuration you are currently on stays highlighted.
 | Preset | Applies | Artwork |
 | --- | --- | --- |
 | **Claude Code** | wordmark = the Claude Code lockup, badge `ANTHROP\C`, mark cell hidden (the spark is stored for when you unhide it) | [assets/claude-code-logo-slate.svg](assets/claude-code-logo-slate.svg), [assets/claude-spark-clay.svg](assets/claude-spark-clay.svg) |
-| **Codex** | mark = the Codex app mark, name `Codex` | [assets/codex-app-icon.png](assets/codex-app-icon.png) |
+| **Codex** | mark = the Codex app mark, name `Codex`, badge `OPENAI` | [assets/codex-app-icon.png](assets/codex-app-icon.png) |
 
 OpenAI publishes no standalone Codex logo file: their own Codex page uses a
 wordmark-only `og:image`, and the product icon exists only inside their app and
