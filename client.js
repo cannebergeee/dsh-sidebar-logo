@@ -41,6 +41,30 @@ window.__ModuleLoader__.load({
     const FIELDS = ['mark', 'wordmark', 'name', 'badge']
     /** Stored flag: occupy the mark cell with nothing, so a self-contained wordmark can stand alone. */
     const HIDE_MARK = 'hideMark'
+    /** Stored flag: show no logo at all and pull the rest of the sidebar up. */
+    const HIDE_BRAND = 'hideBrand'
+    /**
+     * Rules the "no logo" mode needs to reclaim the row's space. They are
+     * keyed on the marker this plugin renders and scoped by how deep that
+     * marker sits, so a host that changes its nesting makes them match nothing
+     * (the mode then simply leaves the row in place) instead of hiding the
+     * wrong thing:
+     *
+     *   1. the row        row > brand > identity > cell > marker
+     *   2. the identity   identity > cell > marker
+     *   3. the brand link brand > identity > cell > marker (the row is excluded
+     *      because it is the `data-window-drag` element; the panel toggle beside
+     *      the brand must survive, it is the only way to collapse the sidebar)
+     *
+     * The whole block is rendered by the name occupant, which the host renders
+     * only while the sidebar is expanded — so the collapsed rail keeps its
+     * expand button untouched.
+     */
+    const HIDDEN_RULES = [
+      '*:has(> * > * > * > [data-dsh-logo-hidden]){height:auto!important;min-height:0!important;padding-top:0!important;padding-bottom:0!important;}',
+      '*:has(> * > [data-dsh-logo-hidden]){height:0!important;min-height:0!important;overflow:hidden!important;}',
+      '*:has(> * > * > [data-dsh-logo-hidden]):not([data-window-drag]){display:none!important;}',
+    ].join('')
     /** Downscaled raster edges: 4x the 24px mark and 4x the 22px wordmark height. */
     const MARK_EDGE = 96
     const WORDMARK_HEIGHT = 96
@@ -64,6 +88,8 @@ window.__ModuleLoader__.load({
         'badge.desc': 'Short tag after the name, like HARNESS.',
         'hideMark.title': 'Hide the mark cell',
         'hideMark.desc': 'For a wordmark image that already contains its own mark: the mark cell renders nothing instead of the shipped whale.',
+        'hideBrand.title': 'Hide the logo row',
+        'hideBrand.desc': 'Show no logo at all: the brand cells stay empty and the row shrinks to the panel toggle, so everything below moves up.',
         'name.placeholder': 'Acme',
         'badge.placeholder': 'HARNESS',
         'choose': 'Choose image…',
@@ -78,6 +104,7 @@ window.__ModuleLoader__.load({
         'presets.desc': 'Fill every field from one brand in a single click; each field stays editable afterwards.',
         'presets.claude': 'Claude Code',
         'presets.codex': 'Codex',
+        'presets.none': 'No logo',
       },
       zh: {
         'section.title': '侧边栏 Logo',
@@ -94,6 +121,8 @@ window.__ModuleLoader__.load({
         'badge.desc': '名称后面的短角标，例如 HARNESS。',
         'hideMark.title': '隐藏徽标格',
         'hideMark.desc': '给自带星芒的字标图片单独显示用：徽标格留空，不再显示官方鲸鱼。',
+        'hideBrand.title': '隐藏整行 logo',
+        'hideBrand.desc': '完全不显示 logo：品牌位留空，顶部行收到只剩折叠按钮的高度，下面的内容整体上移。',
         'name.placeholder': '示例公司',
         'badge.placeholder': 'HARNESS',
         'choose': '选择图片…',
@@ -108,6 +137,7 @@ window.__ModuleLoader__.load({
         'presets.desc': '一键把整套配置换成某个品牌的预设；之后仍可逐项修改。',
         'presets.claude': 'Claude Code',
         'presets.codex': 'Codex',
+        'presets.none': '无 logo',
       },
     }
 
@@ -133,6 +163,7 @@ window.__ModuleLoader__.load({
           name: '',
           badge: 'ANTHROP\\C',
           hideMark: true,
+          hideBrand: false,
         },
       },
       {
@@ -143,6 +174,18 @@ window.__ModuleLoader__.load({
           name: 'Codex',
           badge: 'OPENAI',
           hideMark: false,
+          hideBrand: false,
+        },
+      },
+      {
+        id: 'none',
+        values: {
+          mark: '',
+          wordmark: '',
+          name: '',
+          badge: '',
+          hideMark: false,
+          hideBrand: true,
         },
       },
     ]
@@ -198,6 +241,7 @@ window.__ModuleLoader__.load({
           if (value !== '') next[field] = value
         }
         if (parsed[HIDE_MARK] === true) next[HIDE_MARK] = true
+        if (parsed[HIDE_BRAND] === true) next[HIDE_BRAND] = true
         return next
       } catch {
         return {}
@@ -229,6 +273,7 @@ window.__ModuleLoader__.load({
         if ((a[field] || '') !== (b[field] || '')) return false
       }
       return (a[HIDE_MARK] === true) === (b[HIDE_MARK] === true)
+        && (a[HIDE_BRAND] === true) === (b[HIDE_BRAND] === true)
     }
 
     /**
@@ -419,6 +464,11 @@ window.__ModuleLoader__.load({
     function createBrandComponents(store) {
       const useLogo = () => useSyncExternalStore(store.subscribe, store.getSnapshot)
 
+      /** The element the "no logo" rules key on; it must stay in the tree, so it is hidden, not omitted. */
+      function hiddenMarker(key) {
+        return h('span', { key, 'data-dsh-logo-hidden': '', 'aria-hidden': true, style: { display: 'none' } })
+      }
+
       /**
        * Square mark: the shipped slot hands over the edge length it wants.
        * Also serves the "hide the mark cell" preference, which keeps the cell
@@ -428,6 +478,7 @@ window.__ModuleLoader__.load({
        */
       function BrandMark(props) {
         const logo = useLogo()
+        if (logo[HIDE_BRAND] === true) return hiddenMarker('hidden')
         if (logo[HIDE_MARK] === true || !logo.mark) return null
         const size = typeof props.size === 'number' && props.size > 0 ? props.size : 24
         return h('img', {
@@ -447,6 +498,11 @@ window.__ModuleLoader__.load({
       /** Name cell: a wide wordmark image, the name text, and the badge tag. */
       function BrandName() {
         const logo = useLogo()
+        // The name cell only exists while the sidebar is expanded, so the layout
+        // rules ride here: the collapsed rail keeps its expand button.
+        if (logo[HIDE_BRAND] === true) {
+          return [h('style', { key: 'rule' }, HIDDEN_RULES), hiddenMarker('hidden')]
+        }
         const parts = []
         if (logo.wordmark) {
           parts.push(h('img', {
@@ -685,9 +741,10 @@ window.__ModuleLoader__.load({
         }
 
         const strip = []
-        if (logo.mark && logo[HIDE_MARK] !== true) strip.push(h(brand.BrandMark, { key: 'mark', size: 24 }))
-        if (logo.wordmark || logo.name || logo.badge) strip.push(h(brand.BrandName, { key: 'name' }))
-        const configured = strip.length > 0 || logo[HIDE_MARK] === true
+        const hidden = logo[HIDE_BRAND] === true
+        if (!hidden && logo.mark && logo[HIDE_MARK] !== true) strip.push(h(brand.BrandMark, { key: 'mark', size: 24 }))
+        if (!hidden && (logo.wordmark || logo.name || logo.badge)) strip.push(h(brand.BrandName, { key: 'name' }))
+        const configured = strip.length > 0 || hidden || logo[HIDE_MARK] === true
 
         return h('div', { className: 'sl-page' },
           h('style', { key: 'css' }, PAGE_CSS),
@@ -754,6 +811,17 @@ window.__ModuleLoader__.load({
             onChange: (next) => {
               setProblem('')
               write({ [HIDE_MARK]: next })
+            },
+          }),
+          h(CheckField, {
+            key: 'hideBrand',
+            id: 'sl-field-hide-brand',
+            label: t('hideBrand.title'),
+            description: t('hideBrand.desc'),
+            checked: logo[HIDE_BRAND] === true,
+            onChange: (next) => {
+              setProblem('')
+              write({ [HIDE_BRAND]: next })
             },
           }),
           h(TextField, {
@@ -835,10 +903,11 @@ window.__ModuleLoader__.load({
         }
         const syncBrand = () => {
           const logo = store.getSnapshot()
+          const hideBrand = logo[HIDE_BRAND] === true
           // A configured flag on its own is enough to take the mark cell: the
-          // hide preference paints nothing there, which is the point.
-          const wantMark = Boolean(logo.mark) || logo[HIDE_MARK] === true
-          const wantName = Boolean(logo.wordmark || logo.name || logo.badge)
+          // hide preferences paint nothing there, which is the point.
+          const wantMark = hideBrand || Boolean(logo.mark) || logo[HIDE_MARK] === true
+          const wantName = hideBrand || Boolean(logo.wordmark || logo.name || logo.badge)
           if (wantMark && markDisposer === null) {
             markDisposer = ctx.slots.inject('sidebar.brand.mark', () => ctx.slots.register({
               name: 'sidebar.brand.mark',

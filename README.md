@@ -30,6 +30,8 @@ directory.
    - **Wordmark image** — a wide logo image after the mark.
    - **Hide the mark cell** — keep the mark cell empty instead of showing the
      shipped whale, for a wordmark image that already contains its own mark.
+   - **Hide the logo row** — show no logo at all and pull the rest of the
+     sidebar up (see below).
    - **Name** — plain text beside the mark.
    - **Badge** — a short tag after the name, like `HARNESS`.
 3. The preview follows your edits, and so does the sidebar (about 200 ms after
@@ -51,6 +53,7 @@ of the configuration you are currently on stays highlighted.
 | --- | --- | --- |
 | **Claude Code** | wordmark = the Claude Code lockup, badge `ANTHROP\C`, mark cell hidden (the spark is stored for when you unhide it) | [assets/claude-code-logo-slate.svg](assets/claude-code-logo-slate.svg), [assets/claude-spark-clay.svg](assets/claude-spark-clay.svg) |
 | **Codex** | mark = the Codex app mark, name `Codex`, badge `OPENAI` | [assets/codex-app-icon.png](assets/codex-app-icon.png) |
+| **No logo** | nothing at all — both cells empty and the row trimmed to the panel toggle | — |
 
 OpenAI publishes no standalone Codex logo file: their own Codex page uses a
 wordmark-only `og:image`, and the product icon exists only inside their app and
@@ -82,6 +85,22 @@ Both cells also serve the collapsed 56 px rail, whose expand button rests on the
 mark cell — which is why leaving the mark blank keeps the whale there instead of
 leaving the button empty.
 
+### How "No logo" reclaims the row
+
+Empty cells alone are not enough: the shell still reserves a 60 px brand row. In
+that mode the occupants render an invisible `[data-dsh-logo-hidden]` marker plus
+a rule keyed on it, and the rule reaches the row by **how deep the marker sits**
+rather than by any of the shell's hashed class names — the row's fixed height
+and padding are released, the identity collapses, and the brand link is removed.
+The panel toggle beside it stays, because it is the only way to collapse the
+sidebar by mouse; the row therefore ends up as tall as that toggle, and
+everything below moves up by the rest.
+
+The rule is emitted by the name cell, which the shell renders only while the
+sidebar is expanded, so the collapsed rail keeps its expand button untouched. If
+a future shell changes that nesting, the selectors stop matching and the row
+simply stays where it is — the mode never hides an unrelated element.
+
 ## Limitations
 
 - **Settings live in this browser only.** They are stored in `localStorage` under
@@ -99,6 +118,8 @@ leaving the button empty.
   run past the row.
 - **The collapsed rail shows only the mark**, because that is the cell the shell
   renders when the sidebar folds.
+- **"No logo" trims the row, it does not delete it.** The panel toggle has to
+  stay for the sidebar to remain collapsible.
 - **The presets carry other vendors' marks.** They are trademarks of Anthropic
   and OpenAI, used only to identify the tool each preset mirrors — see
   [Trademarks](#trademarks).
