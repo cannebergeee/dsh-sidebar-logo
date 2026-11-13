@@ -4,7 +4,8 @@ English | [中文](README.zh.md)
 
 A DeepSeek Harness plugin that replaces parts of the logo in the sidebar's
 top-left corner — the DeepSeek whale, the `deepseek` wordmark, and the `HARNESS`
-badge — with your own artwork, edited from a page inside Settings.
+badge — with your own artwork, edited from a page inside Settings. Two built-in
+presets switch the whole row to Claude Code or Codex in one click.
 
 ## Install
 
@@ -24,7 +25,7 @@ directory.
 ## Use it
 
 1. Open **Settings** (sidebar foot) and choose **Sidebar logo** in the section list.
-2. Fill in any combination of:
+2. Press a preset, or fill in any combination of:
    - **Mark image** — a square image drawn at 24 × 24 px where the whale sits.
    - **Wordmark image** — a wide logo image after the mark.
    - **Hide the mark cell** — keep the mark cell empty instead of showing the
@@ -40,6 +41,22 @@ the shipped wordmark stays. Turn on **Hide the mark cell** when the artwork you
 supply replaces the whole lockup, so the whale does not sit beside it.
 
 **Reset to shipped logo** clears every field and brings the original back.
+
+## Presets
+
+Two presets set every field at once. They live above the preview, and the button
+of the configuration you are currently on stays highlighted.
+
+| Preset | Applies | Artwork |
+| --- | --- | --- |
+| **Claude Code** | wordmark = the Claude Code lockup, badge `ANTHROP\C`, mark cell hidden (the spark is stored for when you unhide it) | [assets/claude-code-logo-slate.svg](assets/claude-code-logo-slate.svg), [assets/claude-spark-clay.svg](assets/claude-spark-clay.svg) |
+| **Codex** | mark = the Codex terminal mark, name `Codex`, badge `OPENAI` | [assets/codex-mark.svg](assets/codex-mark.svg) |
+
+A preset writes only the same five fields you can edit by hand, so after applying
+one you can change or clear anything. The artwork is embedded in `client.js`
+(13 KiB of base64) so a preset works with no file picking and no network;
+`assets/` keeps the readable copies, and `node tools/embed-presets.mjs`
+regenerates the embedded block after you change one.
 
 ## How it works
 
@@ -75,10 +92,22 @@ leaving the button empty.
   name ellipsizes when the sidebar narrows, and the badge is capped so it cannot
   run past the row.
 - **The collapsed rail shows only the mark**, because that is the cell the shell
-  renders when the sidebar is folded.
-- **No third-party artwork ships here.** The plugin draws nothing itself: bring
-  your own image. Logos of other products stay their owners' trademarks — use
-  them only where you are allowed to.
+  renders when the sidebar folds.
+- **The presets carry other vendors' marks.** They are trademarks of Anthropic
+  and OpenAI, used only to identify the tool each preset mirrors — see
+  [Trademarks](#trademarks).
+
+## Trademarks
+
+The files under [`assets/`](assets/) are published by Anthropic and OpenAI and
+are **not covered by this repository's MIT license**. They are included so a
+preset can show a recognizable mark for the tool it represents; nothing was
+redrawn, and the Codex light variant only recolors the stroke. Sources, hashes,
+and the applicable rules are in [assets/SOURCES.md](assets/SOURCES.md).
+
+This project is not affiliated with, endorsed by, or sponsored by Anthropic or
+OpenAI. Both vendors' guidelines forbid using their marks in a way that suggests
+endorsement or as part of your own product's name or logo.
 
 ## Files
 
@@ -87,10 +116,13 @@ leaving the button empty.
 | `package.json` | Bundle manifest: patch, Client declaration, exports, icon. |
 | `cordis.patch.yml` | Inserts the `sidebar-logo` Loader entry. |
 | `index.js` | Host seat; imports nothing and registers nothing. |
-| `client.js` | Brand occupants, Settings page, storage, dictionaries. |
+| `client.js` | Brand occupants, Settings page, presets, storage, dictionaries. |
 | `locale/*.json` | Plugin Manager title and description. |
 | `icon.svg` | Plugin icon. |
+| `assets/` | Brand artwork for the presets, with sources and trademark notes. |
+| `tools/embed-presets.mjs` | Regenerates the embedded artwork inside `client.js`. |
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT for the plugin code — see [LICENSE](LICENSE). The artwork in `assets/` is
+excluded from that grant.

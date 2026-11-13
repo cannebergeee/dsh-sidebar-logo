@@ -2,7 +2,7 @@
 
 [English](README.md) | 中文
 
-一个 DeepSeek Harness 插件：把侧边栏左上角的 logo 按部分换成你自己的素材 —— DeepSeek 鲸鱼徽标、`deepseek` 文字标识、`HARNESS` 角标都能分别替换，编辑入口在「设置」里。
+一个 DeepSeek Harness 插件：把侧边栏左上角的 logo 按部分换成你自己的素材 —— DeepSeek 鲸鱼徽标、`deepseek` 文字标识、`HARNESS` 角标都能分别替换，编辑入口在「设置」里。内置两套预设，一点就能把整行换成 Claude Code 或 Codex。
 
 ## 安装
 
@@ -18,7 +18,7 @@ dsh plugin --profile <profile> add github:cannebergeee/dsh-sidebar-logo
 ## 使用
 
 1. 打开 **设置**（侧栏底部），在分区列表里选 **侧边栏 Logo**。
-2. 任意组合填写：
+2. 点一个预设，或者任意组合填写：
    - **徽标图片** —— 替代鲸鱼的方形图片，以 24 × 24 px 显示。
    - **字标图片** —— 跟在徽标后面的宽幅 logo 图片。
    - **隐藏徽标格** —— 徽标格留空、不再显示官方鲸鱼；给自带星芒的整张字标图片用。
@@ -29,6 +29,17 @@ dsh plugin --profile <profile> add github:cannebergeee/dsh-sidebar-logo
 **留空的项保持 DeepSeek 原样。** 这是逐项生效的，不是全有或全无：只填名称，鲸鱼还在；只换徽标，官方文字标识还在。当你提供的素材本身就是整张锁定版（自带星芒）时，打开 **隐藏徽标格**，否则鲸鱼会和它并排出现。
 
 **恢复原 logo** 会清空所有字段，把原样还回来。
+
+## 预设
+
+两套预设一次写满所有字段。它们在预览上方，当前处在哪个配置，对应的按钮就保持高亮。
+
+| 预设 | 写入什么 | 素材 |
+| --- | --- | --- |
+| **Claude Code** | 字标 = Claude Code 锁定版，角标 `ANTHROP\C`，隐藏徽标格（星芒仍存着，取消隐藏就能看到） | [assets/claude-code-logo-slate.svg](assets/claude-code-logo-slate.svg)、[assets/claude-spark-clay.svg](assets/claude-spark-clay.svg) |
+| **Codex** | 徽标 = Codex 终端标记，名称 `Codex`，角标 `OPENAI` | [assets/codex-mark.svg](assets/codex-mark.svg) |
+
+预设写的只是你手动也能改的那五个字段，套用之后随便改、随便清。素材以 base64 内嵌在 `client.js` 里（13 KiB），所以预设不需要选文件、也不需要联网；`assets/` 保留可读的原始文件，改完素材跑 `node tools/embed-presets.mjs` 重新生成内嵌块。
 
 ## 工作机制
 
@@ -44,7 +55,13 @@ dsh plugin --profile <profile> add github:cannebergeee/dsh-sidebar-logo
 - **图片是内嵌的，不走文件路径。** 选中的位图会在页面里缩放（徽标 96 px，字标高 96 px、宽最多 640 px）后存成 `data:` URL；SVG 保留矢量，上限 256 KB。
 - **名称和角标是纯文字。** 它们跟随侧栏的墨色，所以浅色/深色主题都正常；徽标和字标保留自己的颜色。侧栏变窄时名称会省略号截断，角标有宽度上限，不会顶出这一行。
 - **折叠轨道只显示徽标**，因为外壳在折叠时只渲染那一格。
-- **本仓库不附带任何第三方素材。** 插件自己什么都不画，请自带图片。其他产品的标识归各自权利人所有，请只在你有权使用的场合使用。
+- **预设里带的是别家的标识。** 它们分别是 Anthropic 和 OpenAI 的商标，只用来标明预设对应的工具 —— 见下面的商标说明。
+
+## 商标
+
+[`assets/`](assets/) 下的文件由 Anthropic 和 OpenAI 发布，**不在本仓库 MIT 许可证的范围内**。把它们放进来只是为了让预设能显示一个可辨认的对应标识；没有任何重绘，Codex 的浅色版只改了描边颜色。来源、哈希和适用规则见 [assets/SOURCES.md](assets/SOURCES.md)。
+
+本项目与 Anthropic、OpenAI 无隶属、背书或赞助关系。两家的品牌规范都禁止任何让人误以为存在背书、或把其标识用作你自有产品名称/logo 的用法。
 
 ## 文件
 
@@ -53,10 +70,12 @@ dsh plugin --profile <profile> add github:cannebergeee/dsh-sidebar-logo
 | `package.json` | bundle 清单：patch、Client 声明、exports、图标。 |
 | `cordis.patch.yml` | 插入 `sidebar-logo` 这条 Loader 条目。 |
 | `index.js` | Host 半边；不 import 任何包，不注册任何东西。 |
-| `client.js` | 品牌位、设置页、存储、词典，全部在这里。 |
+| `client.js` | 品牌位、设置页、预设、存储、词典，全部在这里。 |
 | `locale/*.json` | Plugin Manager 里的标题和描述。 |
 | `icon.svg` | 插件图标。 |
+| `assets/` | 预设用的品牌素材，附来源与商标说明。 |
+| `tools/embed-presets.mjs` | 重新生成 `client.js` 里的内嵌素材。 |
 
 ## 许可证
 
-MIT —— 见 [LICENSE](LICENSE)。
+插件代码为 MIT —— 见 [LICENSE](LICENSE)。`assets/` 下的素材不在该授权范围内。
