@@ -89,17 +89,18 @@ leaving the button empty.
 
 Empty cells alone are not enough: the shell still reserves a 60 px brand row. In
 that mode the occupants render an invisible `[data-dsh-logo-hidden]` marker plus
-a rule keyed on it, and the rule reaches the row by **how deep the marker sits**
-rather than by any of the shell's hashed class names — the row's fixed height
-and padding are released, the identity collapses, and the brand link is removed.
-The panel toggle beside it stays, because it is the only way to collapse the
-sidebar by mouse; the row therefore ends up as tall as that toggle, and
-everything below moves up by the rest.
+one rule keyed on it, and the rule finds the row by **how deep the marker sits**
+rather than by any of the shell's hashed class names — the row is removed, so the
+New Session button and the workspace list start at the very top.
 
-The rule is emitted by the name cell, which the shell renders only while the
-sidebar is expanded, so the collapsed rail keeps its expand button untouched. If
-a future shell changes that nesting, the selectors stop matching and the row
-simply stays where it is — the mode never hides an unrelated element.
+That removes the panel toggle too, since it lives in the same row. Collapsing the
+sidebar from the keyboard still works: **Mod+B** (`Ctrl+B`, or `Cmd+B` on macOS;
+rebindable in the shortcut reference). The collapsed rail keeps its own expand
+button, because the rule is emitted by the name cell — the shell renders that
+cell only while the sidebar is expanded.
+
+If a future shell changes that nesting, the rule matches nothing and the row
+simply stays where it is; the mode never hides an unrelated element.
 
 ## Limitations
 
@@ -118,8 +119,9 @@ simply stays where it is — the mode never hides an unrelated element.
   run past the row.
 - **The collapsed rail shows only the mark**, because that is the cell the shell
   renders when the sidebar folds.
-- **"No logo" trims the row, it does not delete it.** The panel toggle has to
-  stay for the sidebar to remain collapsible.
+- **"No logo" removes the row, the panel toggle included.** Use `Mod+B` to
+  collapse the sidebar while that mode is on; the rail still carries its own
+  expand button.
 - **The presets carry other vendors' marks.** They are trademarks of Anthropic
   and OpenAI, used only to identify the tool each preset mirrors — see
   [Trademarks](#trademarks).

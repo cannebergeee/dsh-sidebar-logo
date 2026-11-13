@@ -1,6 +1,6 @@
 {
   "name": "@local/sidebar-logo",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "private": true,
   "type": "module",
   "description": "Replace the DeepSeek Harness sidebar logo with your own mark image, wordmark image, name text, and badge tag — with one-click Claude Code and Codex presets.",

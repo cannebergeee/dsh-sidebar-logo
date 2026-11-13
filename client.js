@@ -44,27 +44,22 @@ window.__ModuleLoader__.load({
     /** Stored flag: show no logo at all and pull the rest of the sidebar up. */
     const HIDE_BRAND = 'hideBrand'
     /**
-     * Rules the "no logo" mode needs to reclaim the row's space. They are
-     * keyed on the marker this plugin renders and scoped by how deep that
-     * marker sits, so a host that changes its nesting makes them match nothing
-     * (the mode then simply leaves the row in place) instead of hiding the
-     * wrong thing:
+     * The "no logo" mode removes the shell's brand row, which is otherwise a
+     * fixed 60 px band even with both brand cells empty. The rule is keyed on
+     * the invisible marker this plugin renders and finds the row by HOW DEEP
+     * that marker sits — no hashed class name is involved, so a shell that
+     * changes its nesting makes the rule match nothing (the row then simply
+     * stays where it is) instead of hiding an unrelated element:
      *
-     *   1. the row        row > brand > identity > cell > marker
-     *   2. the identity   identity > cell > marker
-     *   3. the brand link brand > identity > cell > marker (the row is excluded
-     *      because it is the `data-window-drag` element; the panel toggle beside
-     *      the brand must survive, it is the only way to collapse the sidebar)
+     *   row > brand link > identity > cell > marker      (4 levels up)
      *
-     * The whole block is rendered by the name occupant, which the host renders
-     * only while the sidebar is expanded — so the collapsed rail keeps its
-     * expand button untouched.
+     * The row goes entirely, including the panel toggle that sits beside the
+     * brand. That is deliberate: the user asked for everything below to move
+     * up. `Mod+B` keeps collapsing the sidebar, and the collapsed rail keeps
+     * its own expand button because the rule ships from the name cell, which
+     * the shell renders only while the sidebar is expanded.
      */
-    const HIDDEN_RULES = [
-      '*:has(> * > * > * > [data-dsh-logo-hidden]){height:auto!important;min-height:0!important;padding-top:0!important;padding-bottom:0!important;}',
-      '*:has(> * > [data-dsh-logo-hidden]){height:0!important;min-height:0!important;overflow:hidden!important;}',
-      '*:has(> * > * > [data-dsh-logo-hidden]):not([data-window-drag]){display:none!important;}',
-    ].join('')
+    const HIDDEN_RULES = '*:has(> * > * > * > [data-dsh-logo-hidden]){display:none!important;}'
     /** Downscaled raster edges: 4x the 24px mark and 4x the 22px wordmark height. */
     const MARK_EDGE = 96
     const WORDMARK_HEIGHT = 96
