@@ -1,5 +1,7 @@
 # Sidebar logo
 
+English | [中文](README.zh.md)
+
 A DeepSeek Harness plugin that replaces parts of the logo in the sidebar's
 top-left corner — the DeepSeek whale, the `deepseek` wordmark, and the `HARNESS`
 badge — with your own artwork, edited from a page inside Settings.
