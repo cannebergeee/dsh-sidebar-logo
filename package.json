@@ -1,9 +1,9 @@
 {
   "name": "@local/sidebar-logo",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": true,
   "type": "module",
-  "description": "Replace the DeepSeek Harness sidebar logo with your own mark image, wordmark image, name text, and badge tag — with one-click Claude Code and Codex presets, plus three Claude style switches for the colour tokens, the composer card and the conversation.",
+  "description": "Replace the DeepSeek Harness sidebar logo with your own mark image, wordmark image, name text, and badge tag — with one-click Claude Code and Codex presets, plus five Claude style switches for the colour tokens, the composer card, the conversation, the popovers and the sidebar.",
   "license": "MIT",
   "author": "cannebergeee",
   "homepage": "https://github.com/cannebergeee/dsh-sidebar-logo#readme",

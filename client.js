@@ -67,7 +67,7 @@ window.__ModuleLoader__.load({
     /** Cap for an image kept as an untouched data URL (SVG passthrough included). */
     const MAX_EMBEDDED_BYTES = 256 * 1024
     /**
-     * The three Claude style switches, ported from dsh-claude-style 0.21.0. Each
+     * The five Claude style switches, ported from dsh-claude-style 0.21.0. Each
      * pair is one stored flag and the one body attribute its stylesheet block is
      * gated on, so a switch that is off contributes nothing to the page — not a
      * hidden rule, not a reset: the block simply matches nothing.
@@ -76,11 +76,13 @@ window.__ModuleLoader__.load({
       { flag: 'styleTokens', attr: 'data-dsh-logo-tokens' },
       { flag: 'styleComposer', attr: 'data-dsh-logo-composer' },
       { flag: 'styleChat', attr: 'data-dsh-logo-chat' },
+      { flag: 'stylePopover', attr: 'data-dsh-logo-popover' },
+      { flag: 'styleSidebar', attr: 'data-dsh-logo-sidebar' },
     ]
     /** Id of the single <style> element all three blocks share. */
     const STYLE_ELEMENT_ID = 'dsh-logo-style'
     /**
-     * The ported look. Three parts, each gated on its own body attribute:
+     * The ported look. Five parts, each gated on its own body attribute:
      *
      * 1. tokens — the colour card (clay accent, paper canvas, warm neutrals, and
      *    the dark set that derives from them). The host reads these through its
@@ -89,15 +91,20 @@ window.__ModuleLoader__.load({
      *    user's bubble at once.
      * 2. composer — the input card's radius, outline, lift and focus halo.
      * 3. chat — the conversation's prose rhythm and its markdown material.
+     * 4. popover — menus, listboxes, dialogs and tooltips: the card's inset and
+     *    radius, its rows' height, padding and radius, and the menu fill token.
+     * 5. sidebar — the row rhythm of the workspace and session lists.
      *
      * Host hooks are the semantic attributes the shipped client already
      * publishes — `[data-composer-card]`, `[data-composer-input]`,
-     * `[data-composer-variant]`, `[data-phase]`, `[data-chat-flow]` and the
-     * `.md-code-block` class — never hashed class names, so a host rebuild can
-     * only make a rule miss, never point it at the wrong element. The declared
-     * values are the ones in dsh-claude-style's `docs/STYLE.md` colour and shape
-     * tables; its typefaces are not shipped here, so the port keeps the host's
-     * faces and takes only the palette and the geometry.
+     * `[data-phase]`, `[data-chat-flow]`, `.md-code-block`, `[role="menu"]`,
+     * `[role="menuitem"]`, `[data-slot]` and the sidebar's camel-case class
+     * locals (`sessionRow`, `projectRow`, `panelRow`, …) — never a hash, so a
+     * host rebuild can only make a rule miss, never point it at the wrong
+     * element. The declared values are the ones in dsh-claude-style's
+     * `docs/STYLE.md` colour and shape tables and its `theme/sidebar.css` and
+     * `shared/popover.css`; its typefaces are not shipped here, so the port
+     * keeps the host's faces and takes only the palette and the geometry.
      */
     const STYLE_CSS = `
 /* ---------- 1. Colour tokens ---------- */
@@ -302,6 +309,79 @@ body[data-dsh-logo-chat] [data-chat-flow] a {
   text-decoration-thickness: 1.5px;
   text-underline-offset: 2px;
 }
+
+/* ---------- 4. Popovers and menus ---------- */
+/* The card fill rides the host's menu material token, so every menu surface —
+   the account menu, the model picker, the sidebar row menu — agrees without a
+   selector per menu. Geometry is Claude's: a 6px inset card at 12px radius with
+   32px rows at 6px. */
+body[data-dsh-logo-popover] {
+  --dsw-menu-surface-fill: var(--dsw-alias-bg-overlay, #ffffff);
+  --dsw-specific-menu: var(--dsw-alias-bg-overlay, #ffffff);
+}
+
+body[data-dsh-logo-popover] :is([role="menu"], [role="listbox"]) {
+  padding: 6px;
+  border-radius: 12px;
+}
+
+body[data-dsh-logo-popover] :is([role="menu"], [role="listbox"]) :is(
+  [role="menuitem"],
+  [role="menuitemradio"],
+  [role="menuitemcheckbox"],
+  [role="option"]
+) {
+  min-height: 32px;
+  padding: 2px 7px;
+  gap: 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+body[data-dsh-logo-popover] :is([role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"], [role="option"]):hover:not(:disabled) {
+  background: var(--dsw-alias-interactive-bg-hover, rgba(6, 6, 6, 0.08));
+}
+
+body[data-dsh-logo-popover] [role="dialog"] {
+  border-radius: 16px;
+}
+
+body[data-dsh-logo-popover] [role="tooltip"] {
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* ---------- 5. Left sidebar ---------- */
+/* The host writes its row metrics as inherited custom properties and its rows
+   carry camel-case local class names (a hash-prefixed _sessionRow_…); matching
+   the local name survives a rebuild that rehashes it. 9px of row padding less
+   the 3px paint inset is Claude's 6px, and the label gap drops 6px to 4px. */
+body[data-dsh-logo-sidebar] :is([class*="sessionRow"], [class*="projectRow"], [class*="panelRow"]) {
+  --dsh-sidebar-row-padding: 9px;
+  --dsh-sidebar-label-gap: 4px;
+  height: 28px;
+  border-radius: 6px;
+}
+
+body[data-dsh-logo-sidebar] [class*="panelRow"] {
+  min-height: 28px;
+}
+
+body[data-dsh-logo-sidebar] [class*="sessionRow"] [class*="title"] {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-secondary, #70686a);
+}
+
+body[data-dsh-logo-sidebar] [class*="sessionRow"]:is(:hover, [class*="selected"]) [class*="title"] {
+  color: var(--dsw-alias-label-primary, #161616);
+}
+
+body[data-dsh-logo-sidebar] :is([class*="sessionRow"], [class*="projectRow"]) [class*="rowActions"] {
+  gap: 6px;
+}
 `
 
     const TRANSLATIONS = {
@@ -338,13 +418,17 @@ body[data-dsh-logo-chat] [data-chat-flow] a {
         'presets.codex': 'Codex',
         'presets.none': 'No logo',
         'styles.title': 'Claude interface',
-        'styles.desc': 'Three parts of the Claude Code look, ported onto the shipped interface. Each switch is independent and takes effect the moment it is flipped.',
+        'styles.desc': 'Five parts of the Claude Code look, ported onto the shipped interface. Each switch is independent and takes effect the moment it is flipped.',
         'styles.tokens.title': 'Colour tokens',
         'styles.tokens.desc': 'The warm Claude palette: clay accent, paper canvas, warm neutrals, and the dark set derived from the same seeds.',
         'styles.composer.title': 'Composer card',
         'styles.composer.desc': 'A rounder outlined input card with a soft lift and a focus halo.',
         'styles.chat.title': 'Conversation',
         'styles.chat.desc': 'Claude’s prose rhythm: paragraph and heading spacing, code blocks and inline-code chips, table heads, quotes and links.',
+        'styles.popover.title': 'Popovers & menus',
+        'styles.popover.desc': 'Menu, dropdown and popover cards: a 6 px inset card at 12 px radius with 32 px rows at 6 px, and the card fill riding the menu material token.',
+        'styles.sidebar.title': 'Left sidebar',
+        'styles.sidebar.desc': 'Session and project rows at 28 px, a 6 px inset, a 6 px radius and 13 px titles — Claude’s sidebar rhythm.',
         'styles.conflict': 'Do not leave this on together with a full theme plugin such as dsh-claude-style: both paint the same tokens.',
       },
       zh: {
@@ -380,13 +464,17 @@ body[data-dsh-logo-chat] [data-chat-flow] a {
         'presets.codex': 'Codex',
         'presets.none': '无 logo',
         'styles.title': 'Claude 界面',
-        'styles.desc': '把 Claude Code 的三个部分搬到宿主界面上；三个开关互相独立，拨动即生效。',
+        'styles.desc': '把 Claude Code 的五个部分搬到宿主界面上；开关互相独立，拨动即生效。',
         'styles.tokens.title': '配色令牌',
         'styles.tokens.desc': 'Claude 的暖色卡：陶土橙强调色、纸白画布、暖中性灰，深色一套同源。',
         'styles.composer.title': '输入卡片',
         'styles.composer.desc': '更圆的描边卡片，配柔和投影与聚焦光晕。',
         'styles.chat.title': '对话流',
         'styles.chat.desc': 'Claude 的排版节奏：段落与标题间距、代码块与行内代码、表头、引用与链接。',
+        'styles.popover.title': '弹层与菜单',
+        'styles.popover.desc': '菜单、下拉与弹层卡片：12 px 圆角、6 px 内距、32 px 行高与 6 px 行圆角，卡片填充改走菜单材质令牌。',
+        'styles.sidebar.title': '左侧栏',
+        'styles.sidebar.desc': '会话与项目行收到 28 px、内距 6 px、6 px 圆角，标题 13 px —— 照 Claude 侧栏的行间节奏。',
         'styles.conflict': '不要与 dsh-claude-style 这类整套主题插件同时开启：两者会抢同一批令牌。',
       },
     }

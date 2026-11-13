@@ -5,9 +5,9 @@ English | [中文](README.zh.md)
 A DeepSeek Harness plugin that replaces parts of the logo in the sidebar's
 top-left corner — the DeepSeek whale, the `deepseek` wordmark, and the `HARNESS`
 badge — with your own artwork, edited from a page inside Settings. Two built-in
-presets switch the whole row to Claude Code or Codex in one click, and three
-switches port Claude Code's colour tokens, composer card and conversation onto
-the shipped interface (see “Claude interface” below).
+presets switch the whole row to Claude Code or Codex in one click, and five
+switches port Claude Code's colour tokens, composer card, conversation, popovers
+and sidebar onto the shipped interface (see “Claude interface” below).
 
 ## Install
 
@@ -106,7 +106,7 @@ simply stays where it is; the mode never hides an unrelated element.
 
 ## Claude interface
 
-Three independent switches on the same Settings page port three parts of the
+Five independent switches on the same Settings page port five parts of the
 Claude Code look onto the shipped interface — taken from
 [dsh-claude-style](https://github.com/Nwflower/dsh-claude-style) 0.21.0. Each one
 takes effect the moment it is flipped; no reload.
@@ -116,14 +116,18 @@ takes effect the moment it is flipped; no reload.
 | **Colour tokens** | The clay accent `#d97757`, paper canvas `#ffffff`, warm sidebar `#fafafa` and the three border steps, with a dark set derived from the same seeds (`#191919` / `#1f1f1f`). The host reads them through its own `--dsw-alias-*` / `--dsw-specific-*` tokens, so one block repaints the canvas, the sidebar, every border, links, inline code and the user's bubble. |
 | **Composer card** | An 18 px radius, 1 px outline, a soft lift, and a focus halo on the input card. The hero field keeps its 86 px; in a conversation the field grows with the draft. |
 | **Conversation** | Prose rhythm and markdown material: 12 px paragraph spacing, the 24/12 heading rhythm, 12 px rounded code blocks, inline-code chips, table heads, quotes, `hr` and links. |
+| **Popovers & menus** | Menu, dropdown and popover cards at a 12 px radius with a 6 px inset, rows cut to 32 px at a 6 px radius and 13/20 type; the card fill rides the host's menu material tokens (`--dsw-menu-surface-fill`, `--dsw-specific-menu`); dialogs 16 px, tooltips 6 px. |
+| **Left sidebar** | Session, project and panel rows at 28 px with a 6 px inset and a 6 px radius, the label gap down from 6 px to 4 px, session titles at 13/18 in the secondary ink that turns primary on hover or selection, and row actions spaced 6 px apart. |
 
-How it is wired: all three blocks live in one `<style>` element, each gated on
-`body[data-dsh-logo-tokens]`, `[data-dsh-logo-composer]` or `[data-dsh-logo-chat]`
-— with a switch off, its block matches nothing at all; nothing is overridden or
-hidden. The selectors use only the semantic hooks the client already publishes
+How it is wired: all five blocks live in one `<style>` element, each gated on
+`body[data-dsh-logo-tokens]`, `-composer`, `-chat`, `-popover` or `-sidebar` —
+with a switch off, its block matches nothing at all; nothing is overridden or
+hidden. The selectors use only the hooks the client already publishes
 (`[data-composer-card]`, `[data-composer-input]`, `[data-phase]`,
-`[data-chat-flow]`, `.md-code-block`), never hashed class names, so a host rebuild
-can make a rule miss but cannot point it at the wrong element.
+`[data-chat-flow]`, `.md-code-block`, `[role="menu"]` / `[role="menuitem"]`, the
+sidebar's camel-case class locals `sessionRow` / `projectRow` / `panelRow` and its
+`--dsh-sidebar-*` row metrics), never a module hash, so a host rebuild can make a
+rule miss but cannot point it at the wrong element.
 
 **The three Anthropic typefaces are not bundled** (they are not redistributable),
 so this port carries the palette and the geometry and leaves the host's faces in
@@ -135,7 +139,7 @@ both paint the same tokens and the later stylesheet wins.
 ## Limitations
 
 - **Settings live in this browser only.** They are stored in `localStorage` under
-  `dsh.sidebar-logo.v1` (the three style switches ride in the same key), so
+  `dsh.sidebar-logo.v1` (the five style switches ride in the same key), so
   another browser or profile starts from the shipped logo and the shipped
   styles. This is presentation, not configuration; nothing here reaches a model
   request or a session. If the browser blocks storage, the page says the change
@@ -176,7 +180,7 @@ endorsement or as part of your own product's name or logo.
 | `package.json` | Bundle manifest: patch, Client declaration, exports, icon. |
 | `cordis.patch.yml` | Inserts the `sidebar-logo` Loader entry. |
 | `index.js` | Host seat; imports nothing and registers nothing. |
-| `client.js` | Brand occupants, Settings page, presets, storage, dictionaries, and the three ported Claude styles with their switches. |
+| `client.js` | Brand occupants, Settings page, presets, storage, dictionaries, and the five ported Claude styles with their switches. |
 | `locale/*.json` | Plugin Manager title and description. |
 | `icon.svg` | Plugin icon. |
 | `assets/` | Brand artwork for the presets, with sources and trademark notes. |
