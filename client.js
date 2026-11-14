@@ -313,17 +313,18 @@ body[data-dsh-logo-chat] [data-chat-flow] a {
 }
 
 /* ---------- 4. Popovers and menus ---------- */
-/* Geometry only: the 6px inset card at 12px radius with 32px rows at 6px. The
-   card's FILL is deliberately left alone here — it belongs to the colour tokens
-   (the menu material token is rebound in block 1), so with the palette switch
-   off the host's own MenuSurface material stands and a menu looks exactly as
-   shipped, whatever this switch is set to. */
-body[data-dsh-logo-popover] :is([role="menu"], [role="listbox"]) {
+/* Gated on BOTH switches on purpose: the menu card's fill and its material are
+   part of the colour card, and Claude's menu shape is part of the same look, so
+   the two travel together. With the palette off a menu keeps the host's own
+   card, rows and MenuSurface material exactly as shipped, whatever this switch
+   says. Geometry is Claude's: a 6px inset card at 12px radius with 32px rows at
+   6px. */
+body[data-dsh-logo-popover][data-dsh-logo-tokens] :is([role="menu"], [role="listbox"]) {
   padding: 6px;
   border-radius: 12px;
 }
 
-body[data-dsh-logo-popover] :is([role="menu"], [role="listbox"]) :is(
+body[data-dsh-logo-popover][data-dsh-logo-tokens] :is([role="menu"], [role="listbox"]) :is(
   [role="menuitem"],
   [role="menuitemradio"],
   [role="menuitemcheckbox"],
@@ -337,15 +338,15 @@ body[data-dsh-logo-popover] :is([role="menu"], [role="listbox"]) :is(
   line-height: 20px;
 }
 
-body[data-dsh-logo-popover] :is([role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"], [role="option"]):hover:not(:disabled) {
+body[data-dsh-logo-popover][data-dsh-logo-tokens] :is([role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"], [role="option"]):hover:not(:disabled) {
   background: var(--dsw-alias-interactive-bg-hover, rgba(6, 6, 6, 0.08));
 }
 
-body[data-dsh-logo-popover] [role="dialog"] {
+body[data-dsh-logo-popover][data-dsh-logo-tokens] [role="dialog"] {
   border-radius: 16px;
 }
 
-body[data-dsh-logo-popover] [role="tooltip"] {
+body[data-dsh-logo-popover][data-dsh-logo-tokens] [role="tooltip"] {
   border-radius: 6px;
   font-size: 12px;
   line-height: 16px;
@@ -424,7 +425,7 @@ body[data-dsh-logo-sidebar] :is([class*="sessionRow"], [class*="projectRow"]) [c
         'styles.chat.title': 'Conversation',
         'styles.chat.desc': 'Claude’s prose rhythm: paragraph and heading spacing, code blocks and inline-code chips, table heads, quotes and links.',
         'styles.popover.title': 'Popovers & menus',
-        'styles.popover.desc': 'Menu, dropdown and popover cards: a 6 px inset card at 12 px radius with 32 px rows at 6 px, and the card fill riding the menu material token.',
+        'styles.popover.desc': 'Claude’s menu card: a 6 px inset at 12 px radius, 32 px rows at 6 px and 13/20 type. Works together with Colour tokens — with the palette off, menus keep the shipped look.',
         'styles.sidebar.title': 'Left sidebar',
         'styles.sidebar.desc': 'Session and project rows at 28 px, a 6 px inset, a 6 px radius and 13 px titles — Claude’s sidebar rhythm.',
         'styles.conflict': 'Do not leave this on together with a full theme plugin such as dsh-claude-style: both paint the same tokens.',
@@ -470,7 +471,7 @@ body[data-dsh-logo-sidebar] :is([class*="sessionRow"], [class*="projectRow"]) [c
         'styles.chat.title': '对话流',
         'styles.chat.desc': 'Claude 的排版节奏：段落与标题间距、代码块与行内代码、表头、引用与链接。',
         'styles.popover.title': '弹层与菜单',
-        'styles.popover.desc': '菜单、下拉与弹层卡片：12 px 圆角、6 px 内距、32 px 行高与 6 px 行圆角，卡片填充改走菜单材质令牌。',
+        'styles.popover.desc': 'Claude 的菜单卡片：6 px 内距、12 px 圆角、32 px 行高、6 px 行圆角、13/20 字号。与「配色令牌」联动 —— 配色关闭时这一项不生效，菜单保持官方原样。',
         'styles.sidebar.title': '左侧栏',
         'styles.sidebar.desc': '会话与项目行收到 28 px、内距 6 px、6 px 圆角，标题 13 px —— 照 Claude 侧栏的行间节奏。',
         'styles.conflict': '不要与 dsh-claude-style 这类整套主题插件同时开启：两者会抢同一批令牌。',
