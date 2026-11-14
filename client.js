@@ -142,6 +142,7 @@ body[data-dsh-logo-tokens] {
   --dsw-specific-selector: #fefefe;
   --dsw-specific-sidebar-fill: #fafafa;
   --dsw-specific-menu: #ffffff;
+  --dsw-menu-surface-fill: #ffffff;
   --dsw-specific-bubble: #f4f2f3;
   --dsw-focus-ring-color: rgba(20, 20, 19, 0.45);
   color: var(--dsw-alias-label-primary);
@@ -182,6 +183,7 @@ body[data-dsh-logo-tokens][data-ds-dark-theme] {
   --dsw-specific-selector: #323232;
   --dsw-specific-sidebar-fill: #1f1f1f;
   --dsw-specific-menu: #282828;
+  --dsw-menu-surface-fill: #232323;
   --dsw-specific-bubble: rgba(255, 255, 255, 0.06);
   --dsw-focus-ring-color: rgba(250, 249, 245, 0.60);
   background-color: var(--dsw-alias-bg-base);
@@ -311,15 +313,11 @@ body[data-dsh-logo-chat] [data-chat-flow] a {
 }
 
 /* ---------- 4. Popovers and menus ---------- */
-/* The card fill rides the host's menu material token, so every menu surface —
-   the account menu, the model picker, the sidebar row menu — agrees without a
-   selector per menu. Geometry is Claude's: a 6px inset card at 12px radius with
-   32px rows at 6px. */
-body[data-dsh-logo-popover] {
-  --dsw-menu-surface-fill: var(--dsw-alias-bg-overlay, #ffffff);
-  --dsw-specific-menu: var(--dsw-alias-bg-overlay, #ffffff);
-}
-
+/* Geometry only: the 6px inset card at 12px radius with 32px rows at 6px. The
+   card's FILL is deliberately left alone here — it belongs to the colour tokens
+   (the menu material token is rebound in block 1), so with the palette switch
+   off the host's own MenuSurface material stands and a menu looks exactly as
+   shipped, whatever this switch is set to. */
 body[data-dsh-logo-popover] :is([role="menu"], [role="listbox"]) {
   padding: 6px;
   border-radius: 12px;
